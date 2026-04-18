@@ -1,0 +1,355 @@
+/* ================================================================
+   L.I.F.E. Pulse — 核心設計系統
+   主題：暗黑金融科技 × 遊戲化學習
+   設計語言：Glassmorphism + 宇宙深藍 + 靛紫漸層
+   ================================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;700;800;900&display=swap');
+
+/* ── CSS 變數（設計 Token）─────────────────────────────────────── */
+:root {
+  /* 色盤 */
+  --bg-void:        #05080f;
+  --bg-deep:        #0a0f1e;
+  --bg-surface:     #111827;
+  --bg-card:        rgba(255, 255, 255, 0.04);
+  --bg-card-hover:  rgba(255, 255, 255, 0.07);
+
+  --accent-primary: #6c63ff;
+  --accent-secondary: #a78bfa;
+  --accent-orange:  #ff6b35;
+  --accent-gold:    #fbbf24;
+  --accent-teal:    #2dd4bf;
+  --accent-red:     #ef4444;
+
+  --shield-blue:    #3b82f6;
+  --shield-glow:    rgba(59, 130, 246, 0.4);
+  --fire-orange:    #f97316;
+  --fire-yellow:    #fcd34d;
+
+  /* 漸層 */
+  --gradient-primary: linear-gradient(135deg, #6c63ff 0%, #a78bfa 100%);
+  --gradient-fire:    linear-gradient(135deg, #f97316 0%, #fcd34d 100%);
+  --gradient-shield:  linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);
+  --gradient-hero:    linear-gradient(160deg, #0a0f1e 0%, #1e1b4b 50%, #0a0f1e 100%);
+
+  /* 文字 */
+  --text-primary:   #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted:     #475569;
+  --text-accent:    #a78bfa;
+
+  /* 邊框 */
+  --border-subtle:  rgba(255, 255, 255, 0.06);
+  --border-accent:  rgba(108, 99, 255, 0.3);
+
+  /* 陰影 */
+  --shadow-card:    0 4px 24px rgba(0, 0, 0, 0.4);
+  --shadow-glow:    0 0 30px rgba(108, 99, 255, 0.2);
+  --shadow-fire:    0 0 20px rgba(249, 115, 22, 0.4);
+  --shadow-shield:  0 0 25px rgba(59, 130, 246, 0.5);
+
+  /* 字體 */
+  --font-display: 'Outfit', sans-serif;
+  --font-body:    'Inter', sans-serif;
+
+  /* 間距 */
+  --radius-sm:  8px;
+  --radius-md:  14px;
+  --radius-lg:  20px;
+  --radius-xl:  28px;
+
+  /* 動畫 */
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ── 全域重置 ─────────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg-void);
+  color: var(--text-primary);
+  line-height: 1.6;
+  min-height: 100dvh;
+  overflow-x: hidden;
+  /* 星空粒子背景 */
+  background-image:
+    radial-gradient(circle at 20% 20%, rgba(108, 99, 255, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(59, 130, 246, 0.06) 0%, transparent 50%),
+    radial-gradient(circle at 50% 50%, rgba(167, 139, 250, 0.04) 0%, transparent 70%);
+}
+
+#root {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── 元件：Glassmorphism 卡片 ────────────────────────────────── */
+.glass-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: var(--shadow-card);
+  transition: all 0.3s var(--ease-smooth);
+}
+
+.glass-card:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-accent);
+  box-shadow: var(--shadow-card), var(--shadow-glow);
+  transform: translateY(-2px);
+}
+
+/* ── 元件：主要按鈕 ──────────────────────────────────────────── */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px 28px;
+  background: var(--gradient-primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.25s var(--ease-spring);
+  box-shadow: 0 4px 20px rgba(108, 99, 255, 0.35);
+}
+
+.btn-primary::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 60%);
+  opacity: 0;
+  transition: opacity 0.25s;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 30px rgba(108, 99, 255, 0.5);
+}
+
+.btn-primary:hover::before { opacity: 1; }
+
+.btn-primary:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* 次要按鈕 */
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 13px 26px;
+  background: transparent;
+  color: var(--accent-secondary);
+  border: 1px solid var(--border-accent);
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.25s var(--ease-smooth);
+}
+
+.btn-secondary:hover {
+  background: rgba(108, 99, 255, 0.12);
+  border-color: var(--accent-primary);
+  color: var(--text-primary);
+  transform: translateY(-1px);
+}
+
+.btn-secondary:active {
+  transform: translateY(0);
+}
+
+/* ── 動畫：數字跳動 ──────────────────────────────────────────── */
+@keyframes numberPop {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.25); }
+  100% { transform: scale(1); }
+}
+
+.number-pop {
+  animation: numberPop 0.4s var(--ease-spring);
+}
+
+/* ── 動畫：連勝火焰 ──────────────────────────────────────────── */
+@keyframes flameDance {
+  0%   { transform: scaleY(1) rotate(-2deg); filter: brightness(1); }
+  25%  { transform: scaleY(1.08) rotate(2deg); filter: brightness(1.15); }
+  50%  { transform: scaleY(0.95) rotate(-1deg); filter: brightness(0.95); }
+  75%  { transform: scaleY(1.05) rotate(1.5deg); filter: brightness(1.1); }
+  100% { transform: scaleY(1) rotate(-2deg); filter: brightness(1); }
+}
+
+.flame {
+  display: inline-block;
+  animation: flameDance 1.8s ease-in-out infinite;
+  transform-origin: bottom center;
+  font-size: 1.4em;
+  filter: drop-shadow(0 0 6px rgba(249, 115, 22, 0.8));
+}
+
+/* ── 動畫：防護罩發光脈衝 ────────────────────────────────────── */
+@keyframes shieldPulse {
+  0%, 100% { box-shadow: 0 0 12px var(--shield-glow), 0 0 24px var(--shield-glow); }
+  50%       { box-shadow: 0 0 20px var(--shield-glow), 0 0 40px rgba(59, 130, 246, 0.25); }
+}
+
+.shield-active {
+  animation: shieldPulse 2.5s ease-in-out infinite;
+}
+
+/* ── 動畫：淡入上升 ──────────────────────────────────────────── */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in-up {
+  animation: fadeInUp 0.5s var(--ease-smooth) forwards;
+}
+
+/* ── 動畫：閃爍提示（防護罩即將破裂） ──────────────────────── */
+@keyframes warningBlink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
+
+.warning-blink {
+  animation: warningBlink 1.2s ease-in-out infinite;
+}
+
+/* ── 動畫：成功爆發 ──────────────────────────────────────────── */
+@keyframes successBurst {
+  0%   { transform: scale(0.8); opacity: 0; }
+  60%  { transform: scale(1.1); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.success-burst {
+  animation: successBurst 0.5s var(--ease-spring) forwards;
+}
+
+/* ── 動畫：載入旋轉 ──────────────────────────────────────────── */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.spinner {
+  width: 22px;
+  height: 22px;
+  border: 2px solid rgba(255,255,255,0.15);
+  border-top-color: var(--accent-primary);
+  border-radius: 50%;
+  animation: spin 0.75s linear infinite;
+}
+
+/* ── 工具類 ──────────────────────────────────────────────────── */
+.text-gradient {
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-fire-gradient {
+  background: var(--gradient-fire);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.divider {
+  height: 1px;
+  background: var(--border-subtle);
+  margin: 20px 0;
+}
+
+/* ── 滾動條美化 ──────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-deep); }
+::-webkit-scrollbar-thumb {
+  background: var(--border-accent);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover { background: var(--accent-primary); }
+
+/* ── Toast 通知 ──────────────────────────────────────────────── */
+@keyframes toastSlideIn {
+  from { transform: translateX(120%); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
+}
+
+@keyframes toastSlideOut {
+  from { transform: translateX(0);    opacity: 1; }
+  to   { transform: translateX(120%); opacity: 0; }
+}
+
+.toast-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.toast {
+  padding: 14px 20px;
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  font-weight: 500;
+  backdrop-filter: blur(16px);
+  border: 1px solid;
+  animation: toastSlideIn 0.35s var(--ease-spring);
+  max-width: 320px;
+}
+
+.toast-success {
+  background: rgba(45, 212, 191, 0.12);
+  border-color: rgba(45, 212, 191, 0.3);
+  color: var(--accent-teal);
+}
+
+.toast-shield {
+  background: rgba(59, 130, 246, 0.12);
+  border-color: rgba(59, 130, 246, 0.4);
+  color: #93c5fd;
+}
+
+.toast-error {
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #fca5a5;
+}
