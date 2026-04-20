@@ -1,10 +1,10 @@
-# ⚛️ L.I.F.E. Pulse — 前端說明
+# L.I.F.E. Pulse — 前端說明
 
 > React 19 + Vite 前端應用，提供遊戲化學習介面。
 
 ---
 
-## 📁 檔案結構地圖
+## 檔案結構地圖
 
 ```
 life_pulse_frontend/
@@ -18,7 +18,7 @@ life_pulse_frontend/
     ├── main.jsx             ← React 根元件掛載（不需修改）
     ├── index.css            ← 全域 CSS 設計系統（色彩、字體、變數）
     │
-    ├── App.jsx              ← 🏠 主應用程式
+    ├── App.jsx              ← 主應用程式
     │                           - 管理所有全域狀態（登入者、積分、連勝等）
     │                           - 統籌各元件之間的資料流
     │                           - 包含 Toast 通知系統
@@ -26,36 +26,36 @@ life_pulse_frontend/
     ├── App.css              ← App 專屬樣式（Layout、Header、Banner 等）
     │
     ├── api/
-    │   └── client.js        ← 📡 Axios HTTP 封裝層
+    │   └── client.js        ← Axios HTTP 封裝層
     │                           - 統一設定後端 baseURL
     │                           - 封裝所有 API 呼叫函數
     │                           - 統一錯誤攔截（console 輸出）
     │
     └── components/
-        ├── Login.jsx        ← 🔑 登入頁面
+        ├── Login.jsx        ← 登入頁面
         │                       - 輸入業務員 ID 即可登入
         │                       - 不需密碼（Demo 設計）
         │
-        ├── StatusBar.jsx    ← 📊 狀態列（連勝火焰 + 盾牌）
+        ├── StatusBar.jsx    ← 狀態列（連勝火焰 + 盾牌）
         │                       - 🔥 連勝天數（x N 格式）
         │                       - 🛡️ 防護罩數量（x N 格式）
         │                       - 有盾牌時顯示藍色發光動畫
         │
-        ├── ActionButtons.jsx ← 🎮 行動按鈕區
+        ├── ActionButtons.jsx ← 行動按鈕區
         │                       - 「開始 7 分鐘學習衝刺」按鈕
         │                       - 點擊後觸發 MathQuiz 答題
         │
-        ├── MathQuiz.jsx     ← 📝 7 分鐘數學答題模組
+        ├── MathQuiz.jsx     ← 7 分鐘數學答題模組
         │                       - 5 題隨機數學題
         │                       - 計分並回傳是否全對
         │                       - 答題完成後呼叫後端 API 寫入積分
         │
-        ├── UserContext.jsx  ← 🏆 排行榜 + 歷史紀錄
+        ├── UserContext.jsx  ← 排行榜 + 歷史紀錄
         │                       - 「個人」標籤：以自己為中心的相對排行榜
         │                       - 「分行」標籤：分公司積分對戰排名
         │                       - 「歷史」標籤：過去每週的積分紀錄
         │
-        └── DevTools.jsx     ← 🛠️ 開發者工具面板（左下角 🛠️ 按鈕）
+        └── DevTools.jsx     ← 🛠️ 開發者工具面板（下方 🛠️ 按鈕）
                                 - 重新載入預設狀態
                                 - 模擬週結算
                                 - 快速加分、增加/中斷連勝
@@ -63,7 +63,7 @@ life_pulse_frontend/
 
 ---
 
-## 🚀 安裝與啟動步驟
+## 安裝與啟動步驟
 
 ### 前置需求
 
@@ -108,7 +108,7 @@ npm run dev
 
 ---
 
-## 🎮 功能操作說明
+## 功能操作說明
 
 ### 主畫面介紹
 
@@ -136,7 +136,7 @@ npm run dev
 │  │ USER_XXXX    38 pts     │ │
 │  └─────────────────────────┘ │
 │                             │
-│ 🛠️                          │  ← DevTools 按鈕（左下角）
+│            🛠️              │  ← DevTools 按鈕（左下角）
 └─────────────────────────────┘
 ```
 
@@ -215,7 +215,7 @@ http://localhost:8000（FastAPI 後端）
 
 ---
 
-## 🎨 設計系統
+## 設計系統
 
 樣式採用純 CSS 自訂屬性（Custom Properties），統一定義在 `index.css`：
 
@@ -235,7 +235,7 @@ http://localhost:8000（FastAPI 後端）
 
 ---
 
-## 🔧 常用指令
+## 常用指令
 
 ```bash
 # 啟動開發伺服器（熱重載）
