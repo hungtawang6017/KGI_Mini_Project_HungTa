@@ -40,7 +40,6 @@ export default function App() {
   const [streakDays, setStreakDays]       = useState(0)
   const [longestStreak, setLongestStreak] = useState(0)
   const [shieldCount, setShieldCount]     = useState(0)
-  const [shieldCounter, setShieldCounter] = useState(0)
   const [leaderboardData, setLeaderboard] = useState(null)
   const [sessionLoading, setSessionLoading]   = useState(false)
   const [lbLoading, setLbLoading]             = useState(false)
@@ -74,7 +73,6 @@ export default function App() {
       setStreakDays(res.data.current_streak_days)
       setLongestStreak(res.data.longest_historical_streak)
       setShieldCount(res.data.active_shields_count)
-      setShieldCounter(res.data.streak_shield_counter)
       setHasStudiedToday(res.data.has_studied_today)
     } catch (err) {
       console.error("Failed to fetch user status", err)
@@ -126,7 +124,6 @@ export default function App() {
       setStreakDays(streak.current_streak_days)
       setLongestStreak(streak.longest_historical_streak)
       setShieldCount(streak.active_shields_count)
-      setShieldCounter(streak.streak_shield_counter)
       setHasStudiedToday(true)
       setLastPoints(points_awarded)
 
@@ -198,11 +195,11 @@ export default function App() {
           {/* ── Hero 標語 ── */}
           <div className="hero-section fade-in-up">
             <h2 className="hero-title">
-              你的每一分鐘，<br />
-              <span className="text-gradient">都在拉開差距</span>
+              Every Little Bit Makes a 
+              <span className="text-gradient">  Difference</span>
             </h2>
             <p className="hero-sub">
-              完成一次 7 分鐘的微學習衝刺，讓知識在遺忘前被烙印進記憶。
+              每天累積 7 分鐘的小進步，成就更棒的自己！
             </p>
           </div>
 
@@ -223,7 +220,6 @@ export default function App() {
               streakDays={streakDays} 
               shieldCount={shieldCount} 
               longestStreak={longestStreak} 
-              shieldCounter={shieldCounter}
             />
           </div>
 
@@ -255,14 +251,17 @@ export default function App() {
           {/* ── 底部說明 ── */}
           <div className="footer-note">
             <p>此平台嚴格遵循資安規範 · 積分採不可變帳本設計</p>
-            <p>每日 00:01 自動結算連勝狀態 · 盾牌保護你不間斷的學習習慣</p>
+            <p>每週日 23:59 自動結算連勝狀態 · 盾牌保護你日常突如其來的忙碌</p>
           </div>
 
         </main>
 
         <DevTools 
           agentId={loggedInAgent} 
-          onActionComplete={refreshAllData}
+          onActionComplete={() => {
+            refreshAllData();
+            setLastPoints(null);
+          }}
           addToast={addToast}
         />
       </div>

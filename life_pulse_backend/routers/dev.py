@@ -38,8 +38,11 @@ def award_bonus(agent_id: str, event_type: str = "quiz_perfect", db: Session = D
         entry = PointLedger(agent_id=agent_id, event_type=event_type, points_awarded=pts)
         db.add(entry)
 
-        # 更新排行榜快取
-        epoch_week = _get_epoch_week()
+        # 更新排行榜快取：使用與 CRUD 一致的「最新週次」邏輯
+        from sqlalchemy import desc
+        latest_week_record = db.query(LeaderboardStandings.epoch_week_number).order_by(desc(LeaderboardStandings.epoch_week_number)).first()
+        epoch_week = latest_week_record[0] if latest_week_record else _get_epoch_week()
+        
         standing = db.query(LeaderboardStandings).filter(
             LeaderboardStandings.agent_id == agent_id,
             LeaderboardStandings.epoch_week_number == epoch_week,
@@ -100,10 +103,8 @@ def increase_streak(agent_id: str, db: Session = Depends(get_db)):
 
         shield_awarded = False
         # 只要累計滿 3 天就發放防護罩（測試面板不設上限，方便測試）
-        streak.streak_shield_counter = (streak.streak_shield_counter or 0) + 1
-        if streak.streak_shield_counter >= SHIELD_STREAK_THRESHOLD:
+        if streak.current_streak_days % SHIELD_STREAK_THRESHOLD == 0:
             streak.active_shields_count = (streak.active_shields_count or 0) + 1
-            streak.streak_shield_counter = 0 # 重置計數器
             shield_awarded = True
 
         db.commit()
@@ -137,10 +138,21 @@ def break_streak(agent_id: str, db: Session = Depends(get_db)):
             shield_consumed = True
         else:
             streak.current_streak_days = 0
-            streak.streak_shield_counter = 0
 
         # 將最後學習日設為前天，模擬昨日中斷
         streak.last_study_date = date.today() - timedelta(days=2)
+        
+        # 也要更新排行榜（歸零本週積分）
+        from sqlalchemy import desc
+        latest_week_record = db.query(LeaderboardStandings.epoch_week_number).order_by(desc(LeaderboardStandings.epoch_week_number)).first()
+        epoch_week = latest_week_record[0] if latest_week_record else _get_epoch_week()
+        
+        standing = db.query(LeaderboardStandings).filter(
+            LeaderboardStandings.agent_id == agent_id,
+            LeaderboardStandings.epoch_week_number == epoch_week,
+        ).first()
+        if standing:
+            standing.weekly_points_total = 0
 
         db.commit()
         return {

@@ -75,7 +75,7 @@ export default function DevTools({ agentId, onActionComplete, addToast }) {
           onClick={() => handleAction(() => triggerDevBonus(agentId, 'bio_rhythm_bonus'), '🧬 生理節律加成 +2 積分！')}
           disabled={loading}
         >
-          模擬生理節律加成 (+2)
+          模擬 Bio-Rhythm 加分 (+2)
         </button>
 
       <button 

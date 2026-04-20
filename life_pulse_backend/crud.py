@@ -97,10 +97,8 @@ def award_points_and_update_streak(
             streak.longest_historical_streak = streak.current_streak_days
 
         # ── 規則 2：每累計學習 3 天，發放防護罩 ──────────────────────
-        streak.streak_shield_counter = (streak.streak_shield_counter or 0) + 1
-        if streak.streak_shield_counter >= SHIELD_STREAK_THRESHOLD:
+        if streak.current_streak_days % SHIELD_STREAK_THRESHOLD == 0:
             streak.active_shields_count = (streak.active_shields_count or 0) + 1
-            streak.streak_shield_counter = 0 # 重置計數器
             shield_awarded = True
 
     # ── 規則 1：寫入積分帳本（Append-only） ──────────────────────────
@@ -209,7 +207,6 @@ def run_daily_settlement(
         else:
             # 無護盾 → 連勝歸零（歷史最長連勝紀錄不受影響）
             streak.current_streak_days = 0
-            streak.streak_shield_counter = 0
             streaks_reset += 1
 
     return {
@@ -330,46 +327,58 @@ def get_user_status(db: Session, agent_id: str) -> dict:
         "current_streak_days": streak.current_streak_days,
         "longest_historical_streak": streak.longest_historical_streak,
         "active_shields_count": streak.active_shields_count,
-        "streak_shield_counter": streak.streak_shield_counter,
         "has_studied_today": has_studied,
     }
 
 def perform_weekly_settlement(db: Session):
     """
-    模擬每週日結算：將本週積分存入歷史，並將所有人積分歸零。
-    為了模擬「推進到下一週」，我們會將現有 standings 的週次 ID 往後推一週。
+    模擬每週日結算：
+    為了維持 3 張表架構且不丟失資料，我們「產生下一週的新紀錄並歸零」。
+    這樣現有的資料就會自然變成「歷史紀錄」。
     """
-    from models import WeeklyHistory
-    standings = db.query(LeaderboardStandings).all()
+    # 找到目前資料庫中最新的週次
+    latest_week_record = db.query(LeaderboardStandings.epoch_week_number).order_by(desc(LeaderboardStandings.epoch_week_number)).first()
+    current_week = latest_week_record[0] if latest_week_record else _get_epoch_week()
     
-    for s in standings:
-        # 1. 存入歷史
-        db.add(WeeklyHistory(
+    # 計算下一週
+    try:
+        year = int(current_week[:4])
+        week = int(current_week[4:])
+        if week >= 52:
+            new_week = f"{year+1}01"
+        else:
+            new_week = f"{year}{week+1:02d}"
+    except:
+        new_week = _get_epoch_week() # Fallback
+        
+    # 取得目前所有的參與者與其對應的分行
+    # 我們只需要幫有紀錄的人建立新週次的空紀錄
+    current_standings = db.query(LeaderboardStandings).filter(LeaderboardStandings.epoch_week_number == current_week).all()
+    
+    for s in current_standings:
+        db.add(LeaderboardStandings(
             agent_id=s.agent_id,
-            epoch_week_number=s.epoch_week_number,
-            final_points=s.weekly_points_total
+            branch_id=s.branch_id,
+            epoch_week_number=new_week,
+            weekly_points_total=0
         ))
         
-        # 2. 歸零本週積分
-        s.weekly_points_total = 0
-        
-        # 3. 模擬推進到下一週：將 epoch_week_number 字串最後兩位 +1
-        try:
-            year = int(s.epoch_week_number[:4])
-            week = int(s.epoch_week_number[4:])
-            if week >= 52:
-                new_week = f"{year+1}01"
-            else:
-                new_week = f"{year}{week+1:02d}"
-            s.epoch_week_number = new_week
-        except:
-            pass # 格式不對則跳過
-    
     db.commit()
 
 def get_user_history(db: Session, agent_id: str):
     """
     取得該業務員的所有歷史週結算紀錄。
+    從 LeaderboardStandings 撈取非本週的資料。
     """
-    from models import WeeklyHistory
-    return db.query(WeeklyHistory).filter(WeeklyHistory.agent_id == agent_id).order_by(WeeklyHistory.epoch_week_number.desc()).all()
+    latest_week_record = db.query(LeaderboardStandings.epoch_week_number).order_by(desc(LeaderboardStandings.epoch_week_number)).first()
+    current_week = latest_week_record[0] if latest_week_record else _get_epoch_week()
+    
+    return (
+        db.query(LeaderboardStandings)
+        .filter(
+            LeaderboardStandings.agent_id == agent_id,
+            LeaderboardStandings.epoch_week_number != current_week
+        )
+        .order_by(desc(LeaderboardStandings.epoch_week_number))
+        .all()
+    )

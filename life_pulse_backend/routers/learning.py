@@ -75,7 +75,6 @@ def get_status(agent_id: str, db: Session = Depends(get_db)):
         current_streak_days=status_data["current_streak_days"],
         longest_historical_streak=status_data.get("longest_historical_streak", 0),
         active_shields_count=status_data["active_shields_count"],
-        streak_shield_counter=status_data["streak_shield_counter"],
         has_studied_today=status_data["has_studied_today"],
         shield_awarded=False
     )
@@ -88,4 +87,10 @@ def get_status(agent_id: str, db: Session = Depends(get_db)):
 def list_history(agent_id: str, db: Session = Depends(get_db)):
     """回傳該業務員過去每一週結算時的總積分紀錄。"""
     history = get_user_history(db, agent_id)
-    return history
+    # 將 weekly_points_total 映射到 final_points 以符合前端期待
+    return [
+        WeeklyHistoryEntry(
+            epoch_week_number=h.epoch_week_number,
+            final_points=h.weekly_points_total
+        ) for h in history
+    ]

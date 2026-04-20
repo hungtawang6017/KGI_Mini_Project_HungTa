@@ -15,21 +15,21 @@
 import { useState } from 'react'
 
 function RankRow({ entry, animateIn, delay = 0 }) {
-  const { rank_display, agent_code, weekly_points_total, is_current_user } = entry
-
+  // const { rank_display, agent_code, weekly_points_total, is_current_user } = entry
+  const {agent_code, weekly_points_total, is_current_user } = entry
   return (
     <div
       className={`rank-row ${is_current_user ? 'rank-row-current' : ''} ${animateIn ? 'fade-in-up' : ''}`}
       style={{ animationDelay: `${delay}ms` }}
     >
-      <div className={`rank-badge ${is_current_user ? 'rank-badge-current' : ''}`}>
+      {/* <div className={`rank-badge ${is_current_user ? 'rank-badge-current' : ''}`}>
         {rank_display}
-      </div>
+      </div> */}
       <div className="rank-identity">
         <span className={`rank-name ${is_current_user ? 'rank-name-current' : ''}`}>
           {agent_code}
         </span>
-        {is_current_user && <span className="rank-you-tag">本人</span>}
+        {/* {is_current_user && <span className="rank-you-tag">本人</span>} */}
       </div>
       <div className={`rank-points ${is_current_user ? 'text-gradient' : ''}`}>
         {weekly_points_total.toLocaleString()}
@@ -89,7 +89,7 @@ export default function UserContext({ leaderboardData, branchLeaderboardData, hi
       <div className="rank-list">
         {branchLeaderboardData.entries.map((branch, i) => (
           <div key={branch.branch_id} className="rank-row fade-in-up" style={{ animationDelay: `${i * 60}ms` }}>
-            <div className="rank-badge">#{branch.rank}</div>
+            {/* <div className="rank-badge">#{branch.rank}</div> */}
             <div className="rank-identity">
               <span className="rank-name">{branch.branch_id}</span>
             </div>

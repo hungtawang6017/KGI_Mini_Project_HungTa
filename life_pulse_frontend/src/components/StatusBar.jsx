@@ -10,7 +10,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 
-export default function StatusBar({ streakDays = 0, shieldCount = 0, longestStreak = 0, shieldCounter = 0 }) {
+export default function StatusBar({ streakDays = 0, shieldCount = 0, longestStreak = 0 }) {
   const isOnFire = streakDays > 0
   const hasShield = shieldCount > 0
 
@@ -34,9 +34,8 @@ export default function StatusBar({ streakDays = 0, shieldCount = 0, longestStre
           🛡️
         </span>
         <div className="status-text">
-          <span className="status-value">{hasShield ? '已啟動' : '未獲得'}</span>
+          <span className="status-value">x {shieldCount}</span>
           <span className="status-label">防護罩</span>
-          <span className="status-counter">進度: {shieldCounter}/3</span>
         </div>
       </div>
 

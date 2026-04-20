@@ -1,16 +1,252 @@
-# React + Vite
+# ⚛️ L.I.F.E. Pulse — 前端說明
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+> React 19 + Vite 前端應用，提供遊戲化學習介面。
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 📁 檔案結構地圖
 
-## React Compiler
+```
+life_pulse_frontend/
+│
+├── index.html               ← 網頁入口（React 掛載點）
+├── vite.config.js           ← Vite 開發伺服器設定（proxy 等）
+├── package.json             ← 套件清單與指令定義
+│
+└── src/                     ← 原始碼目錄
+    │
+    ├── main.jsx             ← React 根元件掛載（不需修改）
+    ├── index.css            ← 全域 CSS 設計系統（色彩、字體、變數）
+    │
+    ├── App.jsx              ← 🏠 主應用程式
+    │                           - 管理所有全域狀態（登入者、積分、連勝等）
+    │                           - 統籌各元件之間的資料流
+    │                           - 包含 Toast 通知系統
+    │
+    ├── App.css              ← App 專屬樣式（Layout、Header、Banner 等）
+    │
+    ├── api/
+    │   └── client.js        ← 📡 Axios HTTP 封裝層
+    │                           - 統一設定後端 baseURL
+    │                           - 封裝所有 API 呼叫函數
+    │                           - 統一錯誤攔截（console 輸出）
+    │
+    └── components/
+        ├── Login.jsx        ← 🔑 登入頁面
+        │                       - 輸入業務員 ID 即可登入
+        │                       - 不需密碼（Demo 設計）
+        │
+        ├── StatusBar.jsx    ← 📊 狀態列（連勝火焰 + 盾牌）
+        │                       - 🔥 連勝天數（x N 格式）
+        │                       - 🛡️ 防護罩數量（x N 格式）
+        │                       - 有盾牌時顯示藍色發光動畫
+        │
+        ├── ActionButtons.jsx ← 🎮 行動按鈕區
+        │                       - 「開始 7 分鐘學習衝刺」按鈕
+        │                       - 點擊後觸發 MathQuiz 答題
+        │
+        ├── MathQuiz.jsx     ← 📝 7 分鐘數學答題模組
+        │                       - 5 題隨機數學題
+        │                       - 計分並回傳是否全對
+        │                       - 答題完成後呼叫後端 API 寫入積分
+        │
+        ├── UserContext.jsx  ← 🏆 排行榜 + 歷史紀錄
+        │                       - 「個人」標籤：以自己為中心的相對排行榜
+        │                       - 「分行」標籤：分公司積分對戰排名
+        │                       - 「歷史」標籤：過去每週的積分紀錄
+        │
+        └── DevTools.jsx     ← 🛠️ 開發者工具面板（左下角 🛠️ 按鈕）
+                                - 重新載入預設狀態
+                                - 模擬週結算
+                                - 快速加分、增加/中斷連勝
+```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the ESLint configuration
+## 🚀 安裝與啟動步驟
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### 前置需求
+
+- **Node.js 18 以上版本**
+- 後端伺服器已在 `http://localhost:8000` 運行
+
+---
+
+### Step 1：安裝套件
+
+```bash
+# 在 life_pulse_frontend 目錄下執行
+npm install
+```
+
+這會安裝以下主要套件：
+| 套件 | 用途 |
+|------|------|
+| `react` + `react-dom` | UI 框架 |
+| `axios` | HTTP 請求（呼叫後端 API） |
+| `vite` | 打包工具 + 開發伺服器 |
+
+---
+
+### Step 2：啟動開發伺服器
+
+```bash
+npm run dev
+```
+
+啟動後在瀏覽器開啟：**http://localhost:5173**
+
+---
+
+### Step 3：登入系統
+
+在登入畫面輸入業務員 ID，例如：
+- `tester_01`
+- `agent_ruiguang_01`（後端需先執行 `python seed_data.py`）
+
+> 若輸入不存在的 ID，系統會自動建立新的業務員資料。
+
+---
+
+## 🎮 功能操作說明
+
+### 主畫面介紹
+
+```
+┌─────────────────────────────┐
+│  L.I.F.E. Pulse             │  ← Header（顯示日期與業務員 ID）
+│  tester_01 · 2026年4月21日  │
+├─────────────────────────────┤
+│                             │
+│  你的每一分鐘，             │  ← Hero 標語
+│  都在拉開差距               │
+│                             │
+│  ┌──────────┐ ┌──────────┐  │
+│  │ 🔥 x 5  │ │ 🛡️ x 1  │  │  ← StatusBar（火焰天數 + 盾牌數量）
+│  │ 連勝天數  │ │ 防護罩   │  │
+│  └──────────┘ └──────────┘  │
+│                             │
+│  ┌─────────────────────────┐ │
+│  │  🚀 開始 7 分鐘學習衝刺  │ │  ← ActionButtons
+│  └─────────────────────────┘ │
+│                             │
+│  [個人] [分行] [歷史]        │  ← 排行榜標籤切換
+│  ┌─────────────────────────┐ │
+│  │ tester_01    45 pts     │ │  ← UserContext（排行榜 / 歷史）
+│  │ USER_XXXX    38 pts     │ │
+│  └─────────────────────────┘ │
+│                             │
+│ 🛠️                          │  ← DevTools 按鈕（左下角）
+└─────────────────────────────┘
+```
+
+---
+
+### 功能 1：開始學習並加分
+
+1. 點擊「🚀 開始 7 分鐘學習衝刺」
+2. 完成 5 題數學測驗
+3. 系統自動計算積分並更新狀態：
+   - 基礎分 +10
+   - 全對加碼 +5
+   - 連續學習加碼 +2
+4. 畫面上方出現「🎯 +XX 積分」橫幅
+5. 連勝火焰天數更新
+6. 若連勝達 3 的倍數，盾牌數量自動 +1
+
+---
+
+### 功能 2：查看排行榜
+
+點擊「**個人**」標籤 → 顯示以自己為中心的相對排名（前後各 2 名）
+
+> **隱私設計**：自己顯示實際 ID，其他人的 ID 全部匿名化為 4 位代號
+
+---
+
+### 功能 3：分行對戰
+
+點擊「**分行**」標籤 → 顯示各分公司的本週積分總排名
+
+---
+
+### 功能 4：查看歷史紀錄
+
+點擊「**歷史**」標籤 → 顯示每週結算後的積分紀錄
+
+> ⚠️ 需要先點擊 🛠️「模擬每週日結算」才能看到歷史紀錄
+
+---
+
+### 功能 5：開發測試面板
+
+點擊左下角 **🛠️** 展開測試面板：
+
+| 按鈕 | 說明 | 何時使用 |
+|------|------|---------|
+| **重新載入預設狀態** | 清除所有資料，重新植入 40 位測試業務員 | 初始化測試環境 |
+| **模擬每週日結算** | 積分歸零，舊資料變歷史紀錄 | 測試「歷史」標籤 |
+| **快速加分（+10）** | 模擬完成課程，直接加 10 分 | 快速刷排行榜積分 |
+| **快速加分（+5）** | 模擬測驗全對，直接加 5 分 | 同上 |
+| **快速加分（+2）** | 模擬連續學習，直接加 2 分 | 同上 |
+| **增加連勝天數** | 今天再學一次，連勝 +1 天 | 測試防護罩觸發（每 3 天 +1 盾） |
+| **中斷連勝** | 模擬昨天沒上課 | 測試防護罩消耗或斷連 |
+
+---
+
+## 📡 API 呼叫架構
+
+所有後端呼叫都集中在 `src/api/client.js`，前端元件不直接寫 URL。
+
+```
+元件（.jsx）
+    ↓ 呼叫封裝函數
+src/api/client.js（Axios 封裝層）
+    ↓ HTTP 請求
+http://localhost:8000（FastAPI 後端）
+```
+
+**baseURL 設定方式：**
+- 預設：`http://localhost:8000`
+- 可透過環境變數覆蓋：在 `life_pulse_frontend/` 建立 `.env` 檔案
+  ```
+  VITE_API_BASE_URL=http://你的後端主機:8000
+  ```
+
+---
+
+## 🎨 設計系統
+
+樣式採用純 CSS 自訂屬性（Custom Properties），統一定義在 `index.css`：
+
+| 變數 | 說明 |
+|------|------|
+| `--bg-primary` | 主背景色（深色） |
+| `--text-primary` | 主文字色 |
+| `--accent-orange` | 強調色（火焰橘） |
+| `--shield-blue` | 盾牌藍色 |
+| `--ease-spring` | 彈跳動畫緩動函數 |
+
+**視覺效果：**
+- 🔥 火焰：有連勝時帶有橘色脈衝發光動畫
+- 🛡️ 盾牌：有盾牌時帶藍色呼吸光暈動畫
+- ✨ 卡片：玻璃擬態（Glassmorphism）效果
+- 📲 佈局：最大寬度 480px，手機優先設計
+
+---
+
+## 🔧 常用指令
+
+```bash
+# 啟動開發伺服器（熱重載）
+npm run dev
+
+# 打包正式版
+npm run build
+
+# 預覽打包結果
+npm run preview
+
+# 執行 ESLint 程式碼檢查
+npm run lint
+```

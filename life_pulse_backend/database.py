@@ -1,10 +1,9 @@
 """
 database.py — L.I.F.E. Pulse 資料庫引擎與連線池管理
 
-銀行級設計原則：
-- 透過 python-dotenv 讀取 .env，確保機敏資料不寫入程式碼
-- pool_pre_ping=True 自動偵測失效連線並重建，防範潛在斷線
-- get_db() 依賴注入 + finally 區塊，確保 100% 安全釋放連線資源
+支援雙模式運作：
+- 正式模式：讀取 .env 中的 DATABASE_URL 連接 PostgreSQL
+- DEMO 模式：若 .env 不存在或未設定，自動使用本地 SQLite（demo.db）
 """
 
 import os
@@ -12,49 +11,53 @@ from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 
-# 從根目錄 .env 載入環境變數（機敏資料不寫入程式碼）
 load_dotenv()
 
 DATABASE_URL = os.getenv("DATABASE_URL")
-if not DATABASE_URL:
-    raise RuntimeError("❌ 環境變數 DATABASE_URL 未設定！請確認 .env 檔案存在且格式正確。")
 
-# 建立資料庫引擎
-# pool_pre_ping: 每次取用連線前先 ping 一次，避免使用到已失效的連線（防範 Connection Leak）
-# pool_size: 連線池常駐連線數
-# max_overflow: 高峰期可額外借用的臨時連線數
-if DATABASE_URL and "localhost" in DATABASE_URL:
-    DATABASE_URL = DATABASE_URL.replace("localhost", "127.0.0.1")
+# ── 決定使用 PostgreSQL 或 SQLite ──────────────────────────────────
+if DATABASE_URL:
+    # 正式模式：PostgreSQL
+    if "localhost" in DATABASE_URL:
+        DATABASE_URL = DATABASE_URL.replace("localhost", "127.0.0.1")
+    IS_SQLITE = False
+    print("🐘 使用 PostgreSQL 資料庫")
+else:
+    # DEMO 模式：SQLite（不需任何安裝，零配置）
+    _db_path = os.path.join(os.path.dirname(__file__), "demo.db")
+    DATABASE_URL = f"sqlite:///{_db_path}"
+    IS_SQLITE = True
+    print(f"💡 未偵測到 DATABASE_URL，使用 SQLite DEMO 模式：{_db_path}")
 
-engine = create_engine(
-    DATABASE_URL,
-    pool_pre_ping=True,
-    pool_size=20,       # 增加連線池大小以應對並發
-    max_overflow=30,    # 增加溢出連線
-    pool_recycle=3600,  # 每小時回收連線
-    pool_timeout=30,    # 等待連線超時時間
-    echo=False,
-)
+# ── 建立資料庫引擎 ─────────────────────────────────────────────────
+if IS_SQLITE:
+    # SQLite 不支援連線池參數，使用 StaticPool 確保單執行緒安全
+    from sqlalchemy.pool import StaticPool
+    engine = create_engine(
+        DATABASE_URL,
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+        echo=False,
+    )
+else:
+    engine = create_engine(
+        DATABASE_URL,
+        pool_pre_ping=True,
+        pool_size=20,
+        max_overflow=30,
+        pool_recycle=3600,
+        pool_timeout=30,
+        echo=False,
+    )
 
-# 建立 Session 工廠
-# autocommit=False: 必須明確呼叫 commit()，確保交易原子性
-# autoflush=False: 避免在 commit 前意外觸發資料庫寫入
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-# ORM 基底類別 — 所有 Model 都繼承自此
 Base = declarative_base()
 
 
 def get_db():
     """
     FastAPI 依賴注入函數 (Dependency Injection)。
-
-    使用方式：在 API 路由函數的參數中加入 `db: Session = Depends(get_db)`
-
-    設計保證：
-    - 每個 API 請求都會取得獨立的 DB Session（並發安全）
-    - 無論成功或發生任何異常，finally 區塊都會執行 db.close()
-    - 防範連線池耗盡（Connection Pool Exhaustion）
+    每個 API 請求都會取得獨立的 DB Session，並在結束後確保釋放。
     """
     db = SessionLocal()
     try:

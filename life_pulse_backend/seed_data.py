@@ -11,14 +11,12 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 
 load_dotenv()
-DATABASE_URL = os.getenv("DATABASE_URL")
-if not DATABASE_URL:
-    sys.exit("❌ 未設定 DATABASE_URL！")
 
-engine = create_engine(DATABASE_URL)
+# 直接從 database.py 取得引擎，自動沿用 PostgreSQL 或 SQLite 的切換邏輯
+from database import engine, Base
 Session = sessionmaker(bind=engine)
 
-from models import Base, PointLedger, AgentStreaks, LeaderboardStandings
+from models import PointLedger, AgentStreaks, LeaderboardStandings
 from crud import _get_epoch_week
 
 # ── 國小數學課程事件清單 ────────────────────────────────────────────
@@ -101,44 +99,33 @@ def build_ledger_entries(agent_id: str, weekly_pts: int) -> list:
 
 
 def seed():
-    # ── 強制刷新 Schema（開發環境適用） ────────────────────────────────
-    # 因為 create_all 不會更新現有資料表的欄位，所以先刪除再重建
-    temp_db = Session()
-    try:
-        temp_db.execute(text("DROP TABLE IF EXISTS pointledger CASCADE"))
-        temp_db.execute(text("DROP TABLE IF EXISTS agentstreaks CASCADE"))
-        temp_db.execute(text("DROP TABLE IF EXISTS leaderboardstandings CASCADE"))
-        temp_db.execute(text("DROP TABLE IF EXISTS weeklyhistory CASCADE"))
-        temp_db.commit()
-        print("🗑️  舊資料表已移除")
-    except Exception as e:
-        print(f"⚠️  移除資料表時出錯（可能尚不存在）: {e}")
-        temp_db.rollback()
-    finally:
-        temp_db.close()
-
+    # ── 強制刷新 Schema（相容 PostgreSQL 與 SQLite） ─────────────────────────
+    # 使用 ORM 的 drop_all/create_all，自動相容不同資料庫語法
+    print("🗑️  正在移除舊資料表並重建...")
+    Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
+    print("✅ Schema 重建完成")
+
     db = Session()
     try:
         epoch_week = _get_epoch_week()
         today = date.today()
 
         # ── 植入歷史資料（模擬過去兩週） ────────────────────────────────
-        from models import WeeklyHistory
         for agent_id, branch_key, _, _, weekly_pts, _ in AGENTS:
-            # 隨機產生兩週前的紀錄
-            db.add(WeeklyHistory(
+            branch_name = BRANCH_NAMES[branch_key]
+            # 隨機產生兩週前的紀錄，直接存入 LeaderboardStandings
+            db.add(LeaderboardStandings(
                 agent_id=agent_id,
+                branch_id=branch_name,
                 epoch_week_number="202615",
-                final_points=random.randint(50, 200),
-                settlement_date=today - timedelta(days=14)
+                weekly_points_total=random.randint(50, 200)
             ))
-            # 隨機產生上週的紀錄
-            db.add(WeeklyHistory(
+            db.add(LeaderboardStandings(
                 agent_id=agent_id,
+                branch_id=branch_name,
                 epoch_week_number="202616",
-                final_points=random.randint(50, 200),
-                settlement_date=today - timedelta(days=7)
+                weekly_points_total=random.randint(30, 150)
             ))
 
         # ── 植入當前週資料 ───────────────────────────────────────────
@@ -159,7 +146,6 @@ def seed():
                 current_streak_days=streak,
                 longest_historical_streak=longest,
                 active_shields_count=shields,
-                streak_shield_counter=streak % 3, # 根據當前連勝初始化進度
                 last_study_date=last_study,
             ))
 

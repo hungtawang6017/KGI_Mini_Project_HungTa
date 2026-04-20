@@ -34,7 +34,6 @@ class StreakStatus(BaseModel):
     current_streak_days: int
     longest_historical_streak: int
     active_shields_count: int
-    streak_shield_counter: int = Field(default=0, description="盾牌進度計數器")
     has_studied_today: bool = Field(default=False, description="今天是否已完成學習")
     shield_awarded: bool = Field(description="本次學習是否觸發防護罩獎勵")
 
@@ -68,7 +67,6 @@ class WeeklyHistoryEntry(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     epoch_week_number: str
     final_points: int
-    settlement_date: date
 
 
 class SettlementResult(BaseModel):

@@ -48,7 +48,6 @@ class AgentStreaks(Base):
     current_streak_days = Column(Integer, default=0, nullable=False, comment="當前連續學習天數")
     longest_historical_streak = Column(Integer, default=0, nullable=False, comment="歷史最長連勝天數（不隨歸零消失）")
     active_shields_count = Column(Integer, default=0, nullable=False, comment="當前持有防護罩數量")
-    streak_shield_counter = Column(Integer, default=0, nullable=False, comment="盾牌進度計數器（累計 3 天獲得一面）")
     last_study_date = Column(Date, nullable=True, index=True, comment="最後一次完成學習的日期（用於結算判定）")
 
 
@@ -66,15 +65,3 @@ class LeaderboardStandings(Base):
     branch_id = Column(String, nullable=True, comment="所屬分公司 ID（用於分公司對抗機制）")
     epoch_week_number = Column(String, nullable=False, index=True, comment="週期識別碼，格式 YYYYWW，如 202618")
     weekly_points_total = Column(Integer, default=0, nullable=False, index=True, comment="本週累計積分")
-
-class WeeklyHistory(Base):
-    """
-    歷史週結算紀錄 — 儲存每位業務員過去每週的最終積分。
-    """
-    __tablename__ = "weeklyhistory"
-
-    history_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    agent_id = Column(String, nullable=False, index=True, comment="業務員唯一識別碼")
-    epoch_week_number = Column(String, nullable=False, index=True, comment="週週期識別碼")
-    final_points = Column(Integer, nullable=False, comment="結算時的總積分")
-    settlement_date = Column(Date, server_default=func.now(), nullable=False, comment="結算日期")
