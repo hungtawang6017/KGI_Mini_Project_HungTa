@@ -17,7 +17,7 @@ export default function Login({ onLogin }) {
           <span className="brand-icon">⚡</span>
         </div>
         <h1 className="login-title">登入 L.I.F.E. Pulse</h1>
-        <p className="login-sub">請輸入您的測試帳號代碼</p>
+        <p className="login-sub">請輸入您的測試帳號</p>
         
         <form onSubmit={handleSubmit} className="login-form">
           <div className="input-group">
