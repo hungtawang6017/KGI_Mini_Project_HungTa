@@ -1,20 +1,20 @@
-# 🐍 L.I.F.E. Pulse — 後端 API 說明
+# L.I.F.E. Pulse — 後端 API 說明
 
 > FastAPI + SQLAlchemy 後端服務，負責積分計算、連勝判定、排行榜管理。
 
 ---
 
-## 📁 檔案結構地圖
+## 檔案結構地圖
 
 ```
 life_pulse_backend/
 │
-├── main.py              ← 🚀 伺服器啟動入口（FastAPI App + CORS + APScheduler）
-├── database.py          ← 🗄️ 資料庫引擎（自動偵測 PostgreSQL / SQLite）
-├── models.py            ← 📋 資料庫資料表 ORM 定義（三張表）
-├── schemas.py           ← 📐 API 資料格式驗證（Pydantic v2）
-├── crud.py              ← ⚙️ 核心業務邏輯（積分、連勝、排行榜運算）
-├── seed_data.py         ← 🌱 測試資料植入腳本
+├── main.py              ← 伺服器啟動入口（FastAPI App + CORS + APScheduler）
+├── database.py          ← 資料庫引擎（自動偵測 PostgreSQL / SQLite）
+├── models.py            ← 資料庫資料表 ORM 定義（三張表）
+├── schemas.py           ← API 資料格式驗證（Pydantic v2）
+├── crud.py              ← 核心業務邏輯（積分、連勝、排行榜運算）
+├── seed_data.py         ← 測試資料植入腳本
 │
 ├── routers/             ← API 路由模組（每個檔案對應一組 API）
 │   ├── learning.py      ← POST /api/learning/...（完成學習、查狀態、查歷史）
@@ -32,7 +32,7 @@ life_pulse_backend/
 
 ---
 
-## 🗄️ 資料庫三表設計詳解
+## 資料庫三表設計詳解
 
 ### 表 1：`PointLedger`（積分帳本）
 
@@ -79,7 +79,7 @@ life_pulse_backend/
 
 ---
 
-## 🚀 安裝與啟動步驟
+## 安裝與啟動步驟
 
 ### 前置需求
 
@@ -163,15 +163,15 @@ uvicorn main:app --reload
 
 **啟動成功的訊息：**
 ```
-💡 未偵測到 DATABASE_URL，使用 SQLite DEMO 模式  ← SQLite 模式
-🐘 使用 PostgreSQL 資料庫                        ← PostgreSQL 模式
-⏰ APScheduler 4.x 啟動，每日 00:01 自動執行連勝結算
+未偵測到 DATABASE_URL，使用 SQLite DEMO 模式  ← SQLite 模式
+使用 PostgreSQL 資料庫                        ← PostgreSQL 模式
+APScheduler 4.x 啟動，每日 00:01 自動執行連勝結算
 INFO: Uvicorn running on http://0.0.0.0:8000
 ```
 
 ---
 
-## 📡 完整 API 端點說明
+## 完整 API 端點說明
 
 ### 學習引擎（`/api/learning/`）
 
