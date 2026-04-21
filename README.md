@@ -111,7 +111,7 @@ mini_project_王泓達/
 ### Step 1：下載專案
 
 ```bash
-git clone <你的 Git 儲存庫網址>
+git clone https://github.com/hungtawang6017/KGI_Mini_Project_HungTa
 cd KGI_Mini_Project_HungTa
 ```
 
