@@ -112,7 +112,6 @@ mini_project_王泓達/
 
 ```bash
 git clone https://github.com/hungtawang6017/KGI_Mini_Project_HungTa
-cd KGI_Mini_Project_HungTa
 ```
 
 ---
@@ -123,6 +122,7 @@ cd KGI_Mini_Project_HungTa
 
 ```bash
 # 進入後端目錄
+cd KGI_Mini_Project_HungTa
 cd life_pulse_backend
 
 # ── 建立虛擬環境（只需執行一次）──
@@ -131,6 +131,7 @@ py -m venv .venv
 # ── 啟動虛擬環境 ──
 # Windows（PowerShell）：
 .venv\Scripts\Activate.ps1
+
 # Windows（CMD）：
 # .venv\Scripts\activate.bat
 # macOS / Linux：
@@ -141,6 +142,7 @@ py -m venv .venv
 pip install --pre -r requirements.txt
 
 # 設定資料庫（二擇一）
+
 # ── 選項 A：有 PostgreSQL ──
 copy .env.example .env
 # 用任何文字編輯器打開 .env，填入你的 PostgreSQL 連線字串
@@ -165,6 +167,8 @@ uvicorn main:app --reload
 
 ```bash
 # 進入前端目錄
+cd KGI_Mini_Project_HungTa
+
 cd life_pulse_frontend
 
 # 安裝 Node.js 套件（package-lock.json 會鎖定確切版本）
