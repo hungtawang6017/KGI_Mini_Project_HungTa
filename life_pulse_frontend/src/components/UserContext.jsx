@@ -16,7 +16,7 @@ import { useState } from 'react'
 
 function RankRow({ entry, animateIn, delay = 0 }) {
   // const { rank_display, agent_code, weekly_points_total, is_current_user } = entry
-  const {agent_code, weekly_points_total, is_current_user } = entry
+  const { agent_code, weekly_points_total, is_current_user } = entry
   return (
     <div
       className={`rank-row ${is_current_user ? 'rank-row-current' : ''} ${animateIn ? 'fade-in-up' : ''}`}
@@ -77,28 +77,45 @@ export default function UserContext({ leaderboardData, branchLeaderboardData, hi
   }
 
   const renderBranchLeaderboard = () => {
+    // 直接從 branchLeaderboardData 內部讀取 my_branch，不依賴外部 prop
+    const myBranch = branchLeaderboardData?.my_branch ?? null
     if (!branchLeaderboardData || branchLeaderboardData.entries.length === 0) {
       return (
         <div className="uc-empty">
           <div className="uc-empty-icon">🏢</div>
           <p>本週尚無分行排行資料</p>
+          <p style={{ fontSize: '10px', color: 'orange' }}>DEBUG: branchLeaderboardData={JSON.stringify(branchLeaderboardData)}</p>
         </div>
       )
     }
     return (
       <div className="rank-list">
-        {branchLeaderboardData.entries.map((branch, i) => (
-          <div key={branch.branch_id} className="rank-row fade-in-up" style={{ animationDelay: `${i * 60}ms` }}>
-            {/* <div className="rank-badge">#{branch.rank}</div> */}
-            <div className="rank-identity">
-              <span className="rank-name">{branch.branch_id}</span>
+        {/* <p style={{fontSize:'10px',color:'orange',marginBottom:'4px'}}>DEBUG my_branch="{myBranch}" | entries={branchLeaderboardData?.entries?.length}</p> */}
+        {branchLeaderboardData.entries.map((branch, i) => {
+          const isMyBranch = myBranch && branch.branch_id === myBranch
+          return (
+            <div
+              key={branch.branch_id}
+              className={`rank-row ${isMyBranch ? 'rank-row-current' : ''} fade-in-up`}
+              style={{ animationDelay: `${i * 60}ms` }}
+            >
+              {/* 名次徽章 */}
+              {/* <div className={`rank-badge ${isMyBranch ? 'rank-badge-current' : ''}`}>
+                #{branch.rank}
+              </div> */}
+              <div className="rank-identity">
+                <span className={`rank-name ${isMyBranch ? 'rank-name-current' : ''}`}>
+                  {branch.branch_id}
+                </span>
+                {/* {isMyBranch && <span className="rank-you-tag">我的分行</span>} */}
+              </div>
+              <div className={`rank-points ${isMyBranch ? 'text-gradient' : ''}`}>
+                {branch.total_points.toLocaleString()}
+                <span className="rank-pts-label">pts</span>
+              </div>
             </div>
-            <div className="rank-points">
-              {branch.total_points.toLocaleString()}
-              <span className="rank-pts-label">pts</span>
-            </div>
-          </div>
-        ))}
+          )
+        })}
       </div>
     )
   }
@@ -140,21 +157,21 @@ export default function UserContext({ leaderboardData, branchLeaderboardData, hi
     <div className="user-context glass-card">
       {/* 頁籤切換 */}
       <div className="uc-tabs">
-        <button 
+        <button
           key="tab-personal"
           className={`uc-tab ${tab === 'personal' ? 'uc-tab-active' : ''}`}
           onClick={() => setTab('personal')}
         >
           個人排行
         </button>
-        <button 
+        <button
           key="tab-branch"
           className={`uc-tab ${tab === 'branch' ? 'uc-tab-active' : ''}`}
           onClick={() => setTab('branch')}
         >
           分行對戰
         </button>
-        <button 
+        <button
           key="tab-history"
           className={`uc-tab ${tab === 'history' ? 'uc-tab-active' : ''}`}
           onClick={() => setTab('history')}
@@ -172,7 +189,7 @@ export default function UserContext({ leaderboardData, branchLeaderboardData, hi
 
       {/* 隱私聲明 */}
       <div className="uc-privacy-note">
-        🔒 {tab === 'personal' ? '僅顯示帳號與相對排名，保護隱私' : tab === 'branch' ? '數據為本週分行累計積分總和' : '顯示您過去每週的最終結算積分'}
+        {tab === 'personal' ? '個人僅顯示帳號與相對排名' : tab === 'branch' ? '數據為本週分行累計積分總和' : '顯示您過去每週的最終結算積分'}
       </div>
 
       <style>{ucStyles}</style>
@@ -246,7 +263,7 @@ const ucStyles = `
 
   .rank-identity { flex: 1; display: flex; align-items: center; gap: 8px; }
   .rank-name { font-size: 14px; font-weight: 500; color: var(--text-secondary); }
-  .rank-name-current { color: var(--text-primary); font-weight: 700; }
+  .rank-name-current { color: #fff; font-weight: 700; }
   .rank-you-tag {
     font-size: 10px;
     font-weight: 600;

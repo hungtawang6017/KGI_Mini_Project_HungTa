@@ -1,11 +1,30 @@
-fastapi>=0.115.0
-uvicorn[standard]>=0.30.6
-sqlalchemy>=2.0.36
-psycopg2-binary>=2.9.9
-python-dotenv>=1.0.1
-pydantic>=2.10.0
-apscheduler>=4.0.0"
+# ============================================================
+# L.I.F.E. Pulse Backend — Python 依賴套件清單
+# 測試環境：Python 3.13.3
+# 建議最低版本：Python 3.10+
+#
+# 安裝方式（請務必使用虛擬環境）：
+#   pip install --pre -r requirements.txt
+#
+# 注意：apscheduler 4.x 目前仍為 alpha 預覽版（PyPI 上尚無 stable 4.x）
+#       必須加上 --pre 旗標才能安裝。
+# ============================================================
 
-# Testing
-pytest>=8.3.3
-httpx>=0.27.2
+# --- 核心框架 ---
+fastapi>=0.115.0,<1.0.0
+uvicorn[standard]>=0.30.6,<1.0.0
+
+# --- 資料庫 ---
+sqlalchemy>=2.0.36,<3.0.0
+psycopg2-binary>=2.9.9,<3.0.0
+
+# --- 工具 ---
+python-dotenv>=1.0.1,<2.0.0
+pydantic>=2.10.0,<3.0.0
+
+# --- 排程器（alpha 預覽版，需 --pre）---
+apscheduler>=4.0.0a6,<5.0.0
+
+# --- 測試 ---
+pytest>=8.3.3,<10.0.0
+httpx>=0.27.2,<1.0.0

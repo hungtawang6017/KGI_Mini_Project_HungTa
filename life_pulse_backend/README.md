@@ -83,28 +83,46 @@ life_pulse_backend/
 
 ### 前置需求
 
-- Python 3.10 以上版本
-- PostgreSQL（選用，沒有的話系統自動使用 SQLite）
+| 工具 | 最低版本 | 開發測試版本 |
+|------|---------|------------|
+| Python | 3.10+ | 3.13.3 |
+| PostgreSQL | 14+ | — |
+
+> ⚠️ APScheduler 4.x 目前仍為 alpha 預覽版（`4.0.0a6`），**安裝時必須加上 `--pre` 旗標**。
 
 ---
 
-### Step 1：安裝套件
+### Step 1：建立虛擬環境並安裝套件
+
+虛擬環境可確保套件版本隔離，不污染系統全局環境，**強烈建議使用此方式**。
 
 ```bash
-# 在 life_pulse_backend 目錄下執行
-pip install -r requirements.txt
+# 1. 建立虛擬環境（只需執行一次）
+py -m venv .venv
+
+# 2. 啟動虛擬環境
+# Windows（PowerShell）：
+.venv\Scripts\Activate.ps1
+# Windows（CMD）：
+# .venv\Scripts\activate.bat
+# macOS / Linux：
+# source .venv/bin/activate
+
+# 3. 安裝套件
+# 必須加 --pre，因為 apscheduler 4.x 為 alpha 版，PyPI 預設不包括 alpha
+pip install --pre -r requirements.txt
 ```
 
 **requirements.txt 包含的套件：**
-| 套件 | 用途 |
-|------|------|
-| `fastapi` | Web 框架，定義 API |
-| `uvicorn` | ASGI 伺服器，啟動 FastAPI |
-| `sqlalchemy` | ORM，操作資料庫 |
-| `psycopg2-binary` | PostgreSQL 驅動（若使用 SQLite 可不安裝） |
-| `python-dotenv` | 讀取 `.env` 環境變數 |
-| `pydantic` | 資料格式驗證 |
-| `apscheduler` | 每日自動定時結算 |
+| 套件 | 版本約束 | 用途 |
+|------|-----------|------|
+| `fastapi` | `>=0.115.0,<1.0.0` | Web 框架，定義 API |
+| `uvicorn` | `>=0.30.6,<1.0.0` | ASGI 伺服器，啟動 FastAPI |
+| `sqlalchemy` | `>=2.0.36,<3.0.0` | ORM，操作資料庫 |
+| `psycopg2-binary` | `>=2.9.9,<3.0.0` | PostgreSQL 驅動（若使用 SQLite 可不安裝） |
+| `python-dotenv` | `>=1.0.1,<2.0.0` | 讀取 `.env` 環境變數 |
+| `pydantic` | `>=2.10.0,<3.0.0` | 資料格式驗證 |
+| `apscheduler` | `>=4.0.0a6,<5.0.0` | 每日自動定時結算（alpha 預覽版） |
 
 ---
 
@@ -157,6 +175,8 @@ agent_ruiguang_01 ~ agent_ruiguang_40
 ```bash
 uvicorn main:app --reload
 ```
+
+> **💡 如果看到 `uvicorn: command not found`**：請確認虛擬環境已啟動（要先執行上方的 Activate 指令）。
 
 - `--reload`：開發模式，修改程式碼後自動重啟
 - 預設監聽 `http://localhost:8000`

@@ -18,7 +18,7 @@ export default function Login({ onLogin }) {
         </div>
         <h1 className="login-title">登入 L.I.F.E. Pulse</h1>
         <p className="login-sub">請輸入您的測試帳號</p>
-        
+
         <form onSubmit={handleSubmit} className="login-form">
           <div className="input-group">
             <input
@@ -30,12 +30,12 @@ export default function Login({ onLogin }) {
               autoFocus
             />
           </div>
-          
+
           <button type="submit" className="btn-primary login-btn">
             進入系統
           </button>
         </form>
-        
+
         <div className="login-hints">
           <p>預設測試帳號：<code>tester_01</code></p>
           <p>無需密碼，直接進入</p>
@@ -65,6 +65,7 @@ export default function Login({ onLogin }) {
           font-weight: 800;
           margin-top: 16px;
           margin-bottom: 8px;
+          color: #fff;
         }
         .login-sub {
           font-size: 14px;
@@ -108,6 +109,7 @@ export default function Login({ onLogin }) {
         }
         .login-hints code {
           background: rgba(255, 255, 255, 0.1);
+          color: #fff;
           padding: 2px 6px;
           border-radius: 4px;
         }

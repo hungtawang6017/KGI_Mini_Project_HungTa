@@ -97,9 +97,14 @@ mini_project_王泓達/
 
 ### 前置需求
 
-- **Python 3.10+**（必要）
-- **Node.js 18+**（必要）
-- **PostgreSQL**（選用，未安裝時自動改用 SQLite）
+| 工具 | 最低版本 | 開發測試版本 | 備註 |
+|------|---------|------------|------|
+| Python | 3.10+ | 3.13.3 | 必要 |
+| Node.js | 18+ | 24.13.1 | 必要 |
+| npm | 8+ | 11.8.0 | 隨 Node.js 安裝 |
+| PostgreSQL | 14+ | — | **選用**，未安裝時自動改用 SQLite |
+
+> ⚠️ **APScheduler 版本說明**：本專案使用 APScheduler **4.x alpha 預覽版**（`4.0.0a6`），安裝時必須加上 `--pre` 旗標。PyPI 上目前尚無 4.x stable release。
 
 ---
 
@@ -107,30 +112,44 @@ mini_project_王泓達/
 
 ```bash
 git clone <你的 Git 儲存庫網址>
-cd mini_project_王泓達
+cd KGI_Mini_Project_HungTa
 ```
 
 ---
 
-### Step 2：啟動後端
+### Step 2：啟動後端（含虛擬環境）
+
+使用 Python 虛擬環境可確保套件版本隔離，不污染系統環境，**強烈建議每台電腦都使用此方式**。
 
 ```bash
 # 進入後端目錄
 cd life_pulse_backend
 
-# 安裝 Python 套件
-pip install -r requirements.txt
+# ── 建立虛擬環境（只需執行一次）──
+py -m venv .venv
+
+# ── 啟動虛擬環境 ──
+# Windows（PowerShell）：
+.venv\Scripts\Activate.ps1
+# Windows（CMD）：
+# .venv\Scripts\activate.bat
+# macOS / Linux：
+# source .venv/bin/activate
+
+# ── 安裝 Python 套件 ──
+# 注意：apscheduler 4.x 為 alpha 預覽版，必須加 --pre
+pip install --pre -r requirements.txt
 
 # 設定資料庫（二擇一）
 # ── 選項 A：有 PostgreSQL ──
-cp .env.example .env
+copy .env.example .env
 # 用任何文字編輯器打開 .env，填入你的 PostgreSQL 連線字串
 
 # ── 選項 B：無資料庫（DEMO 模式）──
 # 直接跳過，無需任何設定！系統會自動建立 demo.db
 
 # 植入測試資料（首次使用必做）
-python seed_data.py
+py seed_data.py
 
 # 啟動伺服器
 uvicorn main:app --reload
@@ -148,7 +167,7 @@ uvicorn main:app --reload
 # 進入前端目錄
 cd life_pulse_frontend
 
-# 安裝 Node.js 套件
+# 安裝 Node.js 套件（package-lock.json 會鎖定確切版本）
 npm install
 
 # 啟動開發伺服器
@@ -214,11 +233,35 @@ npm run dev
 
 ## 技術架構
 
-| 層 | 技術 |
-|----|------|
-| 前端 | React 19 + Vite 8 + Axios |
-| 後端 | Python + FastAPI + Uvicorn |
-| ORM | SQLAlchemy 2.0 |
-| 資料庫 | PostgreSQL（正式）/ SQLite（DEMO） |
-| 排程 | APScheduler 4.x（每日自動結算） |
-| 驗證 | Pydantic v2 |
+| 層 | 技術 | 版本 |
+|----|------|------|
+| 前端框架 | React | 19.x |
+| 前端打包 | Vite | 8.x |
+| 前端 HTTP | Axios | 1.x |
+| 後端框架 | FastAPI | 0.115+ |
+| ASGI 伺服器 | Uvicorn | 0.30+ |
+| ORM | SQLAlchemy | 2.0+ |
+| 資料庫 | PostgreSQL（正式）/ SQLite（DEMO） | — |
+| 排程器 | APScheduler | 4.0.0a6（alpha） |
+| 資料驗證 | Pydantic | v2 (2.10+) |
+| 執行環境（後端） | Python | 3.10+（測試於 3.13.3） |
+| 執行環境（前端） | Node.js | 18+（測試於 24.x） |
+
+---
+
+## 🐍 虛擬環境說明
+
+本專案後端使用 Python 虛擬環境（`.venv`）確保跨電腦版本一致性。
+
+```
+life_pulse_backend/
+├── .venv/          ← 虛擬環境目錄（已列入 .gitignore，不上傳）
+├── requirements.txt ← 所有套件的版本約束
+└── ...
+```
+
+> **為什麼需要 `--pre` 旗標？**  
+> APScheduler 4.x 目前仍為 alpha 預覽版（`4.0.0a6`），PyPI 預設只安裝 stable release。  
+> 加上 `--pre` 才能安裝到 4.x 版本。若使用一般 `pip install -r requirements.txt` 會安裝到 3.x，導致 `AsyncScheduler` 找不到的錯誤。
+
+> **前端版本管理**：前端使用 `package-lock.json` 鎖定確切版本，執行 `npm install` 即可重現完全相同的依賴樹。

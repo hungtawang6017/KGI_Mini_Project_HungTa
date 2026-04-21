@@ -59,8 +59,8 @@ export default function ActionButtons({
           <>
             <span className="btn-icon">⚡</span>
             <div className="btn-text-block">
-              <span className="btn-main-text">開始 7 分鐘學習衝刺</span>
-              <span className="btn-sub-text">+10 分 · 累積連勝天數</span>
+              <span className="btn-main-text">開始學習衝刺</span>
+              <span className="btn-sub-text">累積學習，目標排行榜登頂</span>
             </div>
           </>
         )}

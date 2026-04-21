@@ -61,10 +61,11 @@ export const getRelativeLeaderboard = (agentId) =>
 
 /**
  * 取得分行對戰排行榜
- * GET /api/leaderboard/branch
+ * GET /api/leaderboard/branch?agent_id={agentId}
+ * 回傳中包含 my_branch，供前端高亮使用者所屬分行
  */
-export const getBranchLeaderboard = () =>
-  apiClient.get('/api/leaderboard/branch')
+export const getBranchLeaderboard = (agentId = null) =>
+  apiClient.get('/api/leaderboard/branch', { params: agentId ? { agent_id: agentId } : {} })
 
 /**
  * 手動觸發每日連勝結算（開發/測試用）

@@ -41,8 +41,8 @@ def relative_leaderboard(
 @router.get(
     "/branch",
     summary="取得分行對戰排行榜",
-    description="回傳本週各分行的總分排行。",
+    description="回傳本週各分行的總分排行。可選傳入 agent_id，回傳中將包含 my_branch 欄位以供前端高亮使用者所屬分行。",
 )
-def branch_leaderboard(db: Session = Depends(get_db)):
-    result = get_branch_leaderboard(db=db)
+def branch_leaderboard(agent_id: str = None, db: Session = Depends(get_db)):
+    result = get_branch_leaderboard(db=db, agent_id=agent_id)
     return result

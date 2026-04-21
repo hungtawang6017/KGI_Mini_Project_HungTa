@@ -145,15 +145,36 @@ def award_points_and_update_streak(
     ).first()
 
     if not standing:
+        # 嘗試從過去紀錄尋找 branch_id
+        last_standing = db.query(LeaderboardStandings).filter(
+            LeaderboardStandings.agent_id == agent_id,
+            LeaderboardStandings.branch_id.isnot(None)
+        ).order_by(desc(LeaderboardStandings.epoch_week_number)).first()
+        branch_id = last_standing.branch_id if last_standing else None
+
+        if not branch_id and agent_id == "tester_01":
+            branch_id = "敦南分行"
+
         # 新建時直接帶入初始積分，避免 flush 前 default 未套用的 NoneType 問題
         standing = LeaderboardStandings(
             agent_id=agent_id,
+            branch_id=branch_id,
             epoch_week_number=epoch_week,
             weekly_points_total=total_points,  # 直接設定，不依賴 column default
         )
         db.add(standing)
     else:
         standing.weekly_points_total = (standing.weekly_points_total or 0) + total_points
+        # 修復既有紀錄若無 branch_id
+        if not standing.branch_id:
+            last_standing = db.query(LeaderboardStandings).filter(
+                LeaderboardStandings.agent_id == agent_id,
+                LeaderboardStandings.branch_id.isnot(None)
+            ).order_by(desc(LeaderboardStandings.epoch_week_number)).first()
+            if last_standing:
+                standing.branch_id = last_standing.branch_id
+            elif agent_id == "tester_01":
+                standing.branch_id = "敦南分行"
 
     return ledger_entries, streak, shield_awarded
 
@@ -278,14 +299,52 @@ def get_relative_leaderboard(
         "entries": entries,
     }
 
-def get_branch_leaderboard(db: Session) -> dict:
+def get_branch_leaderboard(db: Session, agent_id: Optional[str] = None) -> dict:
     """
     分行對戰：加總本週各分公司的總分，回傳排名陣列。
+
+    若提供 agent_id，額外查出該使用者所屬的分行 ID（my_branch），
+    供前端高亮顯示該使用者所屬分行列。
     """
     from sqlalchemy import func, desc
     # 模擬模式：優先使用資料庫中最新的週次 ID
     latest_week_record = db.query(LeaderboardStandings.epoch_week_number).order_by(desc(LeaderboardStandings.epoch_week_number)).first()
     epoch_week = latest_week_record[0] if latest_week_record else _get_epoch_week()
+
+    # 查出使用者所屬分行（若有提供 agent_id）
+    my_branch = None
+    if agent_id:
+        user_standing = (
+            db.query(LeaderboardStandings)
+            .filter(
+                LeaderboardStandings.agent_id == agent_id,
+                LeaderboardStandings.epoch_week_number == epoch_week,
+            )
+            .first()
+        )
+        if user_standing:
+            my_branch = user_standing.branch_id
+
+        # 若這週沒記錄，或這週 branch_id 遺失，往回找
+        if not my_branch:
+            past_standing = (
+                db.query(LeaderboardStandings.branch_id)
+                .filter(
+                    LeaderboardStandings.agent_id == agent_id,
+                    LeaderboardStandings.branch_id.isnot(None)
+                )
+                .order_by(desc(LeaderboardStandings.epoch_week_number))
+                .first()
+            )
+            if past_standing:
+                my_branch = past_standing.branch_id
+            elif agent_id == "tester_01":
+                my_branch = "敦南分行"
+            
+            # 自動修復這週的紀錄
+            if user_standing and my_branch:
+                user_standing.branch_id = my_branch
+                db.commit()
 
     # 依分公司分組加總分數
     results = (
@@ -294,6 +353,7 @@ def get_branch_leaderboard(db: Session) -> dict:
             func.sum(LeaderboardStandings.weekly_points_total).label("total_points")
         )
         .filter(LeaderboardStandings.epoch_week_number == epoch_week)
+        .filter(LeaderboardStandings.branch_id.isnot(None))
         .group_by(LeaderboardStandings.branch_id)
         .order_by(func.sum(LeaderboardStandings.weekly_points_total).desc())
         .all()
@@ -307,7 +367,7 @@ def get_branch_leaderboard(db: Session) -> dict:
             "total_points": int(row.total_points or 0)
         })
 
-    return {"entries": entries}
+    return {"entries": entries, "my_branch": my_branch}
 
 def get_user_status(db: Session, agent_id: str) -> dict:
     """

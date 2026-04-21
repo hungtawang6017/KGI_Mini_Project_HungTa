@@ -92,14 +92,14 @@ export default function App() {
   const fetchBranchLeaderboard = useCallback(async () => {
     setLbLoading(true)
     try {
-      const res = await getBranchLeaderboard()
+      const res = await getBranchLeaderboard(loggedInAgent)
       setBranchLeaderboard(res.data)
     } catch {
       setBranchLeaderboard(null)
     } finally {
       setLbLoading(false)
     }
-  }, [])
+  }, [loggedInAgent])
 
   const refreshAllData = useCallback(async () => {
     await Promise.all([fetchLeaderboard(), fetchBranchLeaderboard(), fetchUserStatus(), fetchUserHistory()])
@@ -111,6 +111,13 @@ export default function App() {
       refreshAllData()
     }
   }, [loggedInAgent, refreshAllData])
+
+  // 當切換到分行對戰標籤時，確保重新拉取最新資料（以取得 my_branch）
+  useEffect(() => {
+    if (loggedInAgent && tab === 'branch') {
+      fetchBranchLeaderboard()
+    }
+  }, [loggedInAgent, tab, fetchBranchLeaderboard])
 
   // ── 完成學習衝刺 ──────────────────────────────────────────────
   const handleCompleteSession = useCallback(async (isPerfect, correctCount) => {
@@ -340,6 +347,7 @@ export default function App() {
           font-weight: 800;
           line-height: 1.3;
           margin-bottom: 10px;
+          color: #fff;
         }
         .hero-sub {
           font-size: 14px;
